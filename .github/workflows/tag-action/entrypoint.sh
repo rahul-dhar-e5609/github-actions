@@ -5,7 +5,7 @@ set -o pipefail
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-true}
-custom_tag=${CUSTOM_TAG}
+custom_tag=${CUSTOM_TAG:-mytag}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
