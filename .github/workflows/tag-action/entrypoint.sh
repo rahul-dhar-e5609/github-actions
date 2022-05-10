@@ -168,7 +168,7 @@ full_name=$GITHUB_REPOSITORY
 git_refs_url=$(jq .repository.git_refs_url $GITHUB_EVENT_PATH | tr -d '"' | sed 's/{\/sha}//g')
 
 echo "$dt: **pushing tag $new to repo $full_name"
-
+echo "Github Token $GITHUB_TOKEN"
 git_refs_response=$(
 curl -s -X POST $git_refs_url \
 -H "Authorization: token $GITHUB_TOKEN" \
