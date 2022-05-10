@@ -56,7 +56,7 @@ case "$tag_context" in
         taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
         echo -e "$(semver $taglist)"
         tag="$(semver $taglist | tail -n 1)"
-        actualtag = "$(echo $taglist | tail -n 1)"
+        actualtag="$(echo $taglist | tail -n 1)"
 
         pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
         pre_tag="$(semver "$pre_taglist" | tail -n 1)"
