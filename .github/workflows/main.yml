@@ -13,6 +13,6 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Bump version and push tag
-      uses: ./.github/workflows/actions
+      uses: ./.github/workflows/tag-action
       env:
         GITHUB_TOKEN: ${{ secrets.TESTING_TOKEN }}
