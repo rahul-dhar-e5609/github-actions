@@ -1,3 +1,3 @@
 # github-actoins
 
-A repo for creating tags using github actions.
+A repo for creating tags using github actions
