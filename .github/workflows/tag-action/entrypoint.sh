@@ -89,7 +89,7 @@ else
 fi
 
 # get current commit hash for tag
-tag_commit=$(git rev-list -n 1 $tag)
+tag_commit=$(git rev-list -n 1 $actualtag)
 
 # get current commit hash
 commit=$(git rev-parse HEAD)
