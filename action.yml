@@ -1,13 +1,13 @@
 name: 'Tag Bump'
 description: 'Bump and push git tag on merge'
 author: 'Rahul Dhar'
-on:
-  workflow_call:
-    secrets:
-      token:
-        required: true
-env:
-  GITHUB_TOKEN: ${{ secrets.token }}
+# on:
+#   workflow_call:
+#     secrets:
+#       token:
+#         required: true
+# env:
+#   GITHUB_TOKEN: ${{ secrets.token }}
 runs:
   using: 'docker'
   image: 'Dockerfile'
