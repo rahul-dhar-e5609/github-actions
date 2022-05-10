@@ -5,13 +5,11 @@ set -o pipefail
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-true}
-release_branches=${RELEASE_BRANCHES:-master,main}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
-suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
 verbose=${VERBOSE:-true}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
@@ -22,49 +20,27 @@ cd ${GITHUB_WORKSPACE}/${source}
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
 echo -e "\tWITH_V: ${with_v}"
-echo -e "\tRELEASE_BRANCHES: ${release_branches}"
 echo -e "\tCUSTOM_TAG: ${custom_tag}"
 echo -e "\tSOURCE: ${source}"
 echo -e "\tDRY_RUN: ${dryrun}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
-echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
-
-# current_branch=$(git rev-parse --abbrev-ref HEAD)
-
-# pre_release="true"
-# IFS=',' read -ra branch <<< "$release_branches"
-# for b in "${branch[@]}"; do
-#     echo "Is $b a match for ${current_branch}"
-#     if [[ "${current_branch}" =~ $b ]]
-#     then
-#         pre_release="false"
-#     fi
-# done
-# echo "pre_release = $pre_release"
 
 # fetch tags
 git fetch --tags
     
 tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$" 
-# preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
     *repo*) 
         taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
         tag="$(semver $taglist | tail -n 1)"
-
-        # pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
-        # pre_tag="$(semver "$pre_taglist" | tail -n 1)"
         ;;
     *branch*) 
         taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
         tag="$(semver $taglist | tail -n 1)"
-
-        # pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
-        # pre_tag=$(semver "$pre_taglist" | tail -n 1)
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
@@ -74,10 +50,6 @@ if [ -z "$tag" ] || [ -z "$taglist" ]
 then
     log=$(git log --pretty='%B')
     tag="$initial_version"
-    # if [ -z "$pre_tag" ] && $pre_release
-    # then
-    #   pre_tag="$initial_version"
-    # fi
 else
     # prefix with 'v'
     if $with_v
@@ -129,15 +101,6 @@ case "$log" in
         ;;
 esac
 echo "New $new | Part $part"
-# if $pre_release
-# then
-#     # Already a prerelease available, bump it
-#     if [[ "$pre_tag" == *"$new"* ]]; then
-#         new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
-#     else
-#         new="$new-$suffix.1"; part="pre-$part"
-#     fi
-# fi
 
 # prefix with 'v'
 if $with_v
@@ -150,14 +113,7 @@ then
     new="$custom_tag"
 fi
 
-# if $pre_release
-# then
-#     echo -e "Pre Tag ${pre_tag}"
-#     echo -e "new Tag ${new}"
-#     echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
-# else
-    echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
-# fi
+echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
 
 # set outputs
 echo ::set-output name=new_tag::$new
