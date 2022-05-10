@@ -54,7 +54,9 @@ preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
 case "$tag_context" in
     *repo*) 
         taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
+        echo -e "$(semver $taglist)"
         tag="$(semver $taglist | tail -n 1)"
+        actualtag = "$(echo $taglist | tail -n 1)"
 
         pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
         pre_tag="$(semver "$pre_taglist" | tail -n 1)"
@@ -83,7 +85,7 @@ then
       pre_tag="$initial_version"
     fi
 else
-    log=$(git log $tag..HEAD --pretty='%B')
+    log=$(git log $actualtag..HEAD --pretty='%B')
 fi
 
 # get current commit hash for tag
