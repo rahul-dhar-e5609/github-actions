@@ -31,65 +31,73 @@ echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
 
-current_branch=$(git rev-parse --abbrev-ref HEAD)
+# current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-pre_release="true"
-IFS=',' read -ra branch <<< "$release_branches"
-for b in "${branch[@]}"; do
-    echo "Is $b a match for ${current_branch}"
-    if [[ "${current_branch}" =~ $b ]]
-    then
-        pre_release="false"
-    fi
-done
-echo "pre_release = $pre_release"
+# pre_release="true"
+# IFS=',' read -ra branch <<< "$release_branches"
+# for b in "${branch[@]}"; do
+#     echo "Is $b a match for ${current_branch}"
+#     if [[ "${current_branch}" =~ $b ]]
+#     then
+#         pre_release="false"
+#     fi
+# done
+# echo "pre_release = $pre_release"
 
 # fetch tags
 git fetch --tags
     
 tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$" 
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
+# preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
     *repo*) 
         taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
-        echo -e "$(semver $taglist)"
         tag="$(semver $taglist | tail -n 1)"
-        actualtag="$(echo $taglist | tail -n 1)"
 
-        pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
-        pre_tag="$(semver "$pre_taglist" | tail -n 1)"
+        # pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
+        # pre_tag="$(semver "$pre_taglist" | tail -n 1)"
         ;;
     *branch*) 
         taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
         tag="$(semver $taglist | tail -n 1)"
 
-        pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
-        pre_tag=$(semver "$pre_taglist" | tail -n 1)
+        # pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
+        # pre_tag=$(semver "$pre_taglist" | tail -n 1)
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
-echo -e "Tag List ${taglist}"
-echo -e "Tag ${tag}"
-echo -e "Pretag List ${pre_taglist}"
-echo -e "Pretag ${pre_tag}"
 
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
 if [ -z "$tag" ] || [ -z "$taglist" ]
 then
     log=$(git log --pretty='%B')
     tag="$initial_version"
-    if [ -z "$pre_tag" ] && $pre_release
-    then
-      pre_tag="$initial_version"
-    fi
+    # if [ -z "$pre_tag" ] && $pre_release
+    # then
+    #   pre_tag="$initial_version"
+    # fi
 else
-    log=$(git log $actualtag..HEAD --pretty='%B')
+    # prefix with 'v'
+    if $with_v
+    then
+        head="v$tag..HEAD"
+    else 
+        head="$tag..HEAD"
+    fi
+    log=$(git log $head --pretty='%B')
 fi
 
+# prefix with 'v'
+if $with_v
+then
+    latest_tag="v$tag"
+else 
+    latest_tag="$tag"
+fi
 # get current commit hash for tag
-tag_commit=$(git rev-list -n 1 $actualtag)
+tag_commit=$(git rev-list -n 1 $latest_tag)
 
 # get current commit hash
 commit=$(git rev-parse HEAD)
@@ -103,9 +111,9 @@ fi
 # echo log if verbose is wanted
 if $verbose
 then
-  echo $log
+  echo "Log -> ${log}"
 fi
-echo -e "Log ${log}"
+
 case "$log" in
     *#major* ) new=$(semver -i major $tag); part="major";;
     *#minor* ) new=$(semver -i minor $tag); part="minor";;
@@ -120,18 +128,16 @@ case "$log" in
         fi 
         ;;
 esac
-
-if $pre_release
-then
-    # Already a prerelease available, bump it
-    if [[ "$pre_tag" == *"$new"* ]]; then
-        new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
-    else
-        new="$new-$suffix.1"; part="pre-$part"
-    fi
-fi
-
-echo $part
+echo "New $new | Part $part"
+# if $pre_release
+# then
+#     # Already a prerelease available, bump it
+#     if [[ "$pre_tag" == *"$new"* ]]; then
+#         new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
+#     else
+#         new="$new-$suffix.1"; part="pre-$part"
+#     fi
+# fi
 
 # prefix with 'v'
 if $with_v
@@ -144,14 +150,14 @@ then
     new="$custom_tag"
 fi
 
-if $pre_release
-then
-    echo -e "Pre Tag ${pre_tag}"
-    echo -e "new Tag ${new}"
-    echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
-else
+# if $pre_release
+# then
+#     echo -e "Pre Tag ${pre_tag}"
+#     echo -e "new Tag ${new}"
+#     echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
+# else
     echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
-fi
+# fi
 
 # set outputs
 echo ::set-output name=new_tag::$new
