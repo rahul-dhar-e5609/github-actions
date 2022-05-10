@@ -15,6 +15,6 @@ jobs:
     - name: Bump version and push tag
       uses: ./reusable-actions/tag-action
       secrets:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TESTING_TOKEN }}
       # env:
       #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
