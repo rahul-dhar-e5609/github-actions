@@ -182,7 +182,8 @@ EOF
 
 git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
 
-echo "::debug::${git_refs_response}"
+echo " Git Refs response -> ${git_refs_response}"
+# echo "::debug::${git_refs_response}"
 if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
   exit 0
 else
