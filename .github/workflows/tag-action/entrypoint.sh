@@ -74,7 +74,7 @@ echo -e "Pretag List ${pre_taglist}"
 echo -e "Pretag ${pre_tag}"
 
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
-if [ -z "$tag" ]
+if [ -z "$tag" ] || [ -z "$taglist" ]
 then
     log=$(git log --pretty='%B')
     tag="$initial_version"
