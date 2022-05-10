@@ -4,7 +4,7 @@ set -o pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
-with_v=${WITH_V:-false}
+with_v=${WITH_V:-true}
 release_branches=${RELEASE_BRANCHES:-master,main}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
@@ -68,7 +68,10 @@ case "$tag_context" in
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
-
+echo -e "Tag List ${taglist}"
+echo -e "Tag ${tag}"
+echo -e "Pretag List ${pre_taglist}"
+echo -e "Pretag ${pre_tag}"
 
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
 if [ -z "$tag" ]
@@ -100,7 +103,7 @@ if $verbose
 then
   echo $log
 fi
-
+echo -e "Log ${log}"
 case "$log" in
     *#major* ) new=$(semver -i major $tag); part="major";;
     *#minor* ) new=$(semver -i minor $tag); part="minor";;
@@ -141,6 +144,8 @@ fi
 
 if $pre_release
 then
+    echo -e "Pre Tag ${pre_tag}"
+    echo -e "new Tag ${new}"
     echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
 else
     echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
