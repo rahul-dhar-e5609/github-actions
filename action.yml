@@ -1,0 +1,23 @@
+name: 'Tag Bump'
+description: 'Bump and push git tag on merge'
+author: 'Rahul Dhar'
+on:
+  workflow_call:
+    secrets:
+      token:
+        required: true
+env:
+  GITHUB_TOKEN: ${{ secrets.token }}
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+outputs:
+  new_tag:
+    description: 'Generated tag'
+  tag:
+    description: 'The latest tag after running this action'
+  part:
+    description: 'The part of version which was bumped'
+branding:
+  icon: 'git-merge'  
+  color: 'purple'
