@@ -9,10 +9,10 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-      with:
-        fetch-depth: '0'
+    # - uses: actions/checkout@master
+    #   with:
+    #     fetch-depth: '0'
     - name: Bump version and push tag
       uses: ./.github/workflows/tag-action
-      secrets:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
