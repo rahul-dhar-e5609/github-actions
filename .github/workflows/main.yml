@@ -15,4 +15,4 @@ jobs:
     - name: Bump version and push tag
       uses: ./.github/workflows/tag-action
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.TESTING_TOKEN }}
